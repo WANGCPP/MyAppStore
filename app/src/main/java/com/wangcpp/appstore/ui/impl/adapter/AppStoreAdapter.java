@@ -1,12 +1,16 @@
 package com.wangcpp.appstore.ui.impl.adapter;
 
 import android.content.Context;
+import android.media.Image;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.wangcpp.appstore.R;
 import com.wangcpp.appstore.presenter.bean.AppBean;
 
@@ -19,12 +23,14 @@ import java.util.List;
  */
 public class AppStoreAdapter extends RecyclerView.Adapter<AppStoreAdapter.ItemViewHolder> {
 
+    private final String TAG = AppStoreAdapter.class.getSimpleName();
+
     private Context mContext = null;
 
     /**
      * App列表
      */
-    private List<AppBean> mAppList = new ArrayList<>();
+    private List<AppBean> mAppList = null;
 
     @Override
     public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -43,6 +49,9 @@ public class AppStoreAdapter extends RecyclerView.Adapter<AppStoreAdapter.ItemVi
 
     @Override
     public int getItemCount() {
+        if (null == mAppList) {
+            return 0;
+        }
         return mAppList.size();
     }
 
@@ -60,18 +69,23 @@ public class AppStoreAdapter extends RecyclerView.Adapter<AppStoreAdapter.ItemVi
      */
     class ItemViewHolder extends RecyclerView.ViewHolder {
 
+        private ImageView ivAppPic = null;
+
         private TextView tvAppName = null;
 
-        public ItemViewHolder(View itemView) {
+
+        ItemViewHolder(View itemView) {
             super(itemView);
             initView();
         }
 
         private void initView() {
             tvAppName = itemView.findViewById(R.id.tv_appstore_recycview_item_appname);
+            ivAppPic = itemView.findViewById(R.id.iv_appstore_recycview_item_apppic);
         }
 
         public void setData(AppBean appBean) {
+            ImageLoader.getInstance().displayImage(appBean.getIcon(), ivAppPic);
             tvAppName.setText(appBean.getName());
         }
     }

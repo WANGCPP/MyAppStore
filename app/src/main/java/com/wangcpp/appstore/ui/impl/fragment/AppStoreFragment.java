@@ -43,12 +43,8 @@ public class AppStoreFragment extends BaseFragment<AppStorePresenter> implements
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_appstore, container, false);
-
-
-
-        mPresenter.queryAppList();
-
         initView(view);
+        mPresenter.queryAppList();
         return view;
     }
 
@@ -57,7 +53,7 @@ public class AppStoreFragment extends BaseFragment<AppStorePresenter> implements
         return new AppStorePresenter(new PostRequestRepository());
     }
 
-    private void initView(View view){
+    private void initView(View view) {
         recyclerView = (RecyclerView) view.findViewById(R.id.recyc_appstore);
         appStoreAdapter = new AppStoreAdapter(getActivity());
 
@@ -72,6 +68,7 @@ public class AppStoreFragment extends BaseFragment<AppStorePresenter> implements
 
     @Override
     public void updateAllAppList(List<AppBean> appListBean) {
+        Log.d(TAG, "updateAllAppList == " + appListBean.size());
         mAllAppList = appListBean;
         appStoreAdapter.setAppList(mAllAppList);
     }

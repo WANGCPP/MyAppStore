@@ -1,7 +1,6 @@
 package com.wangcpp.appstore.ui;
 
 import com.wangcpp.appstore.presenter.bean.AppBean;
-import com.wangcpp.appstore.presenter.bean.AppListBean;
 
 import java.util.List;
 

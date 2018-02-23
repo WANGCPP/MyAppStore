@@ -9,6 +9,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Toast;
 
@@ -59,7 +60,6 @@ public class MainActivity extends BaseActivity<IMainPresenter> implements IMainV
         initView();
         initEvent();
         initFragment();
-        setDefaultFragment(appStoreFragment);
 
         mPresenter.login(); // 登录
     }
@@ -106,8 +106,34 @@ public class MainActivity extends BaseActivity<IMainPresenter> implements IMainV
     public void onLoginResult(boolean result) {
         if (result) {
             Toast.makeText(MainActivity.this, "登录成功", Toast.LENGTH_SHORT).show();
+            setDefaultFragment(appStoreFragment); // 拿到登录成功的结果后，立即创建“应用商店”Fragment
         } else {
             Toast.makeText(MainActivity.this, "登录失败", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /**
+     * 记录拥护首次点击返回键的时间
+     */
+    private long firstTime = 0;
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BACK:
+                long secondTime = System.currentTimeMillis();
+                if (secondTime - firstTime > 2000) {
+                    Toast.makeText(MainActivity.this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
+                    firstTime = secondTime;
+                    return true;
+                } else {
+                    System.exit(0);
+                }
+                break;
+            default:
+                break;
+        }
+
+        return super.onKeyDown(keyCode, event);
     }
 }
