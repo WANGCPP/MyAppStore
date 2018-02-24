@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 
 import com.wangcpp.appstore.R;
 import com.wangcpp.appstore.presenter.bean.AppBean;
-import com.wangcpp.appstore.presenter.bean.AppListBean;
 import com.wangcpp.appstore.presenter.impl.AppStorePresenter;
 import com.wangcpp.appstore.repository.impl.PostRequestRepository;
 import com.wangcpp.appstore.ui.IAppStoreView;
@@ -24,7 +23,7 @@ import java.util.List;
  * Created by WANGCPP on 2018/2/11.
  * 应用商店列表界面
  */
-public class AppStoreFragment extends BaseFragment<AppStorePresenter> implements IAppStoreView {
+public class AppStoreFragment extends BaseFragment<AppStorePresenter> implements IAppStoreView, AppStoreAdapter.OnItemEventListener {
 
     private final String TAG = AppStoreFragment.class.getSimpleName();
 
@@ -71,5 +70,17 @@ public class AppStoreFragment extends BaseFragment<AppStorePresenter> implements
         Log.d(TAG, "updateAllAppList == " + appListBean.size());
         mAllAppList = appListBean;
         appStoreAdapter.setAppList(mAllAppList);
+        appStoreAdapter.setOnItemEventListener(this);
+    }
+
+    @Override
+    public void onBtnClick(AppBean appBean) {
+        Log.d(TAG, "onBtnClick");
+        mPresenter.getApk(appBean);
+    }
+
+    @Override
+    public void onItemClick() {
+        Log.d(TAG, "onItemClick");
     }
 }

@@ -4,7 +4,9 @@ import android.util.Log;
 
 import com.wangcpp.appstore.http.IPostRequest;
 import com.wangcpp.appstore.http.listener.IPostListener;
+import com.wangcpp.appstore.presenter.bean.AppBean;
 import com.wangcpp.appstore.presenter.bean.AppListBean;
+import com.wangcpp.appstore.presenter.bean.DownUrlBase;
 import com.wangcpp.appstore.presenter.bean.LoginBean;
 import com.wangcpp.appstore.repository.IPostRequestRepository;
 
@@ -141,6 +143,59 @@ public class PostRequestRepository implements IPostRequestRepository {
     @Override
     public void setOnPostListener(IPostListener listener) {
         this.mListener = listener;
+    }
+
+    @Override
+    public void getDownUrl(String jsonString) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(URL_BASE)
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .build();
+        IPostRequest postRequest = retrofit.create(IPostRequest.class);
+
+        RequestBody body = RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), jsonString);
+
+        postRequest.postGetDownloadUrl(body)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<DownUrlBase>() {
+
+                    Disposable disposable;
+
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        Log.d(TAG, "onUrlSubscribe");
+                        disposable = d;
+                    }
+
+                    @Override
+                    public void onNext(DownUrlBase downUrlBase) {
+                        Log.d(TAG, "onUrlNext");
+                        mListener.onPostSuccess(downUrlBase);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d(TAG, "onUrlError "+e.getMessage());
+                        mListener.onPostFailed();
+
+                        if (disposable != null && !disposable.isDisposed()) {
+                            disposable.dispose();
+                        }
+                        mListener = null;
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d(TAG, "onUrlComplete");
+                        if (disposable != null && !disposable.isDisposed()) {
+                            disposable.dispose();
+                        }
+                        mListener = null;
+                    }
+                });
+
     }
 
 }

@@ -8,11 +8,15 @@ import com.wangcpp.appstore.presenter.IAppStorePresenter;
 import com.wangcpp.appstore.presenter.bean.AppBean;
 import com.wangcpp.appstore.presenter.bean.AppListBean;
 import com.wangcpp.appstore.presenter.bean.BaseReceptionBean;
+import com.wangcpp.appstore.presenter.bean.DownUrlBase;
+import com.wangcpp.appstore.presenter.bean.DownUrlBean;
 import com.wangcpp.appstore.repository.IPostRequestRepository;
+import com.wangcpp.appstore.repository.download.DownloadManager;
 import com.wangcpp.appstore.ui.IAppStoreView;
 import com.wangcpp.appstore.util.TimeUtil;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -31,6 +35,7 @@ public class AppStorePresenter extends BasePresenter<IAppStoreView> implements I
     private final String TAG = AppStorePresenter.class.getSimpleName();
 
     private IPostRequestRepository mRepository = null;
+
 
     //================数据==================
     /**
@@ -74,9 +79,49 @@ public class AppStorePresenter extends BasePresenter<IAppStoreView> implements I
         maps.put("pn", 1 + "");
         maps.put("sortType", null);
         maps.put("asc", 1 + "");
-        JSONObject jsonObject = new JSONObject(maps);
-        String content = jsonObject.toString();
-        Log.d(TAG, content);
-        return jsonObject.toString();
+        JSONObject jsonObjectResult = new JSONObject(maps);
+        String content = jsonObjectResult.toString();
+        return jsonObjectResult.toString();
+    }
+
+    @Override
+    public void getApk(AppBean appBean) {
+        mRepository.setOnPostListener(new IPostListener() {
+            @Override
+            public void onPostSuccess(BaseReceptionBean bean) {
+                DownUrlBase downUrlBase = (DownUrlBase) bean;
+                DownUrlBean downUrlBean = downUrlBase.getResults().get(0);
+                Log.d(TAG, "url = " + downUrlBean.getUrl());
+                DownloadManager.getInstance().startDownload(downUrlBean.getUrl()); // 获取到下载链接后，开始下载
+
+            }
+
+            @Override
+            public void onPostFailed() {
+
+            }
+        });
+
+        mRepository.getDownUrl(initGetApkJson(appBean));
+    }
+
+    private String initGetApkJson(AppBean appBean) {
+        JSONArray jsonArray = new JSONArray();
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("appId", appBean.getAppId());
+            jsonObject.put("verId", appBean.getVerId());
+            jsonObject.put("version", appBean.getAppVersion());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        jsonArray.put(jsonObject);
+        Map<String, Object> maps = new HashMap<>();
+        maps.put("reqTime", TimeUtil.transferLongToDate(System.currentTimeMillis()));
+        maps.put("token", AppStoreApplication.token);
+        maps.put("apps", jsonArray);
+        JSONObject jsonObjectResult = new JSONObject(maps);
+        Log.d(TAG, jsonObjectResult.toString());
+        return jsonObjectResult.toString();
     }
 }
